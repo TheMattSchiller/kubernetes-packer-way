@@ -1,0 +1,42 @@
+
+buildscript {
+  repositories {
+    jcenter()
+    maven { url "https://plugins.gradle.org/m2" }
+  }
+
+  dependencies {
+    classpath 'com.netflix.nebula:gradle-ospackage-plugin:4.7.0'
+  }
+}
+
+apply plugin: 'nebula.ospackage'
+
+task place_certificates(type:Exec) {
+    workingDir '.'
+    commandLine './place_certificates.sh'
+}
+
+task add_etcd_binary(type:Exec) {
+    workingDir '.'
+    commandLine './add_etcd_binary.sh'
+}
+
+task buildDebianArtifact(type:Deb) {
+  packageName = "etcd"
+  version = "1.0"
+  release = 'bionic'
+
+  dependsOn place_certificates
+  dependsOn add_etcd_binary
+
+  from ('debian/etc') {
+      into ('/etc')
+  }
+
+  from ('debian/usr') {
+      into ('/usr')
+  }
+
+  postInstallFile file('postinstall')
+}
