@@ -1,0 +1,12 @@
+steps:
+- name: 'gcr.io/$PROJECT_ID/packer'
+  args:
+  - build
+  - -on-error=abort
+  - -var
+  - image_name=kube-node
+  - -var
+  - image_family=kube-node
+  - -var
+  - image_zone=us-west1-a
+  - node.packer

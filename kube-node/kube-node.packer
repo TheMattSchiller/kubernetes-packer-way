@@ -1,0 +1,27 @@
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "image_name": "kube-node",
+      "project_id": "i-enterprise-264400",
+      "source_image": "ubuntu-1804-bionic-v20200108",
+      "ssh_username": "packer",
+      "zone": "us-west1-a"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "build/kube-node_1.0-bionic_all.deb",
+      "destination": "/tmp/kube-node_1.0-bionic_all.deb"
+    },
+    {
+      "type": "shell",
+      "script": "install_os_dependencies.sh"
+    },
+    {
+      "type": "shell",
+      "script": "install_deb_pkgs.sh"
+    }
+  ]
+}
