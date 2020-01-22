@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# enable service
+systemctl enable containerd \
+    kubelet \
+    kube-proxy \
+    cni-bridge-setup
