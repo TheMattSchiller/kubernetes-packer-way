@@ -1,0 +1,60 @@
+
+buildscript {
+  repositories {
+    jcenter()
+    maven { url "https://plugins.gradle.org/m2" }
+  }
+
+  dependencies {
+    classpath 'com.netflix.nebula:gradle-ospackage-plugin:4.7.0'
+  }
+}
+
+apply plugin: 'nebula.ospackage'
+
+task create_kube_proxy_config(type:Exec) {
+    workingDir '.'
+    commandLine './create_kube_proxy_config.sh'
+}
+
+task create_kubelet_configs(type:Exec) {
+    workingDir '.'
+    commandLine './create_kubelet_configs.sh'
+}
+
+task add_kube_binaries(type:Exec) {
+    workingDir '.'
+    commandLine './add_kube_binaries.sh'
+}
+
+task buildDebianArtifact(type:Deb) {
+  packageName = "kube-node"
+  version = "1.0"
+  release = 'bionic'
+
+  dependsOn create_kube_proxy_config
+  dependsOn create_kubelet_configs
+  dependsOn add_kube_binaries
+
+  from ('debian/bin') {
+      into ('/bin')
+  }
+
+  from ('debian/etc') {
+      into ('/etc')
+  }
+
+  from ('debian/opt') {
+      into ('/opt')
+  }
+
+  from ('debian/usr') {
+      into ('/usr')
+  }
+
+  from ('debian/var') {
+      into ('/var')
+  }
+
+  postInstallFile file('postinstall')
+}
