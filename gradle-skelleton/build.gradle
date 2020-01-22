@@ -1,0 +1,21 @@
+
+buildscript {
+  repositories {
+    jcenter()
+    maven { url "https://plugins.gradle.org/m2" }
+  }
+
+  dependencies {
+    classpath 'com.netflix.nebula:gradle-ospackage-plugin:4.7.0'
+  }
+}
+
+apply plugin: 'nebula.ospackage'
+
+
+
+task buildDebianArtifact(type:Deb) {
+  packageName = "package_name_here"
+  version = "1.0"
+  release = 'bionic'
+}
