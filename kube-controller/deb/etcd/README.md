@@ -1,7 +1,7 @@
 # Create an etcd package with Gradle
 Kubernetes uses etcd as a highly available key: value store. It stores the configuration of the Kubernetes cluster in etcd. It also stores the actual state of the system and the desired state of the system in etcd.
 
-This readme covers creation of an custom etcd package. Lets start by creating the folder structure for our package by copying our pre-created [gradle skeleton](https://github.com/TheMattSchiller/kubernetes-packer-way/tree/master/gradle_skeleton/README.md) into our etcd deb folder (this directory)
+This readme covers creation of an custom etcd package. Lets start by creating the folder structure for our package by copying our pre-created [gradle skeleton](https://github.com/TheMattSchiller/kubernetes-packer-way/tree/master/gradle-skeleton) into our etcd deb folder (this directory)
 
 Now we will add the paths for our static files needed for etcd:
 ```
