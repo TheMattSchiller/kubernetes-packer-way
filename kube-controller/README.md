@@ -1,6 +1,6 @@
 # Kube-controller packer template
 This directory contains the packer template for creating a kubernetes controller instance image with the assistance of gradle. Packer can be used with CloudBuild on GCP in order to create images which we can the spin up as instances. Before creating this image make sure that the following guides have been followed:
-* [CloudBuild](cloudbuild.md)
+* [CloudBuild](../cloudbuild.md)
 * [Create an etcd package with Gradle](deb/etcd/)
 * [Create a kube-controller package with Gradle](deb/kube-controller/)
 
