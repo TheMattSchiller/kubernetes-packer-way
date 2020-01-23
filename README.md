@@ -12,4 +12,4 @@ Also don't forget to checkout the terraform example to see how we can deploy the
 
 [Link to the terraform repo](https://github.com/TheMattSchiller/madebymatt-terraform)
 
-[Link to this post on my bog]()
+[Link to this post on my bog](https://madebymatt.dev/kubernetes-the-packer-way/)
