@@ -28,4 +28,4 @@ Finally we will build the docker packer image by submitting it to gcloud builds
 cd cloud-builders-community/packer
 gcloud builds submit .
 ```
-[Back to main readme](/)
+[Back to main readme](https://github.com/TheMattSchiller/kubernetes-packer-way)
