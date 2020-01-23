@@ -1,0 +1,12 @@
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/
+After=etcd.service
+
+[Service]
+ExecStart=/bin/bash /etc/kubernetes/start-kube-apiserver.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+steps:
+- name: 'gcr.io/$PROJECT_ID/packer'
+  args:
+  - build
+  - -var
+  - image_name=kube-controller
+  - -var
+  - image_family=kubernetes
+  - -var
+  - image_zone=us-west1-a
+  - kube-controller.packer

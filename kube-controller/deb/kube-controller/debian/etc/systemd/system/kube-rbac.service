@@ -1,0 +1,11 @@
+[Unit]
+Description=Setup Role Binding
+After=kube-controller-manager.service
+After=kube-apiserver.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /etc/kubernetes/kube-rbac.sh
+
+[Install]
+WantedBy=multi-user.target
