@@ -1,0 +1,64 @@
+
+buildscript {
+  repositories {
+    jcenter()
+    maven { url "https://plugins.gradle.org/m2" }
+  }
+
+  dependencies {
+    classpath 'com.netflix.nebula:gradle-ospackage-plugin:4.7.0'
+  }
+}
+
+apply plugin: 'nebula.ospackage'
+
+task create_kube_scheduler_config(type:Exec) {
+    workingDir '.'
+    commandLine './create_kube_scheduler_config.sh'
+}
+
+task create_kube_controller_manager_config(type:Exec) {
+    workingDir '.'
+    commandLine './create_kube_controller_manager_config.sh'
+}
+
+task create_admin_config(type:Exec) {
+    workingDir '.'
+    commandLine './create_admin_config.sh'
+}
+
+task add_kube_binaries(type:Exec) {
+    workingDir '.'
+    commandLine './add_kube_binaries.sh'
+}
+
+task create_encryption_config(type:Exec) {
+    workingDir '.'
+    commandLine './create_encryption_config.sh'
+}
+
+task buildDebianArtifact(type:Deb) {
+  packageName = "kube-controller"
+  version = "1.0"
+  release = 'bionic'
+
+  dependsOn create_kube_scheduler_config
+  dependsOn create_kube_controller_manager_config
+  dependsOn create_admin_config
+  dependsOn add_kube_binaries
+  dependsOn create_encryption_config
+
+  from ('debian/etc') {
+      into ('/etc')
+  }
+
+  from ('debian/usr') {
+      into ('/usr')
+  }
+
+  from ('debian/var') {
+      into ('/var')
+  }
+
+  postInstallFile file('postinstall')
+}
