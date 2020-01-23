@@ -9,7 +9,7 @@ mkdir -p debian/etc/etcd
 mkdir -p debian/etc/systemd/system
 mkdir -p usr/local/bin
 ```
-Now add the necessary certificates to the pki directory. See the [pki readme](../../../pki/README.md)
+Now add the necessary certificates to the pki directory. See the [pki readme](../../../pki/)
 ```
 cp ../../../pki/ca.pem ../../../pki/kubernetes.pem ../../../pki/kubernetes-key.pem pki/
 ```
@@ -136,3 +136,4 @@ task buildDebianArtifact(type:Deb) {
   postInstallFile file('postinstall')
 }
 ```
+[Back to kube-controller packer template](../../README.md)
