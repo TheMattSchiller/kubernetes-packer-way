@@ -459,6 +459,6 @@ task buildDebianArtifact(type:Deb) {
   postInstallFile file('postinstall')
 }
 ```
-[Back to kube-controller packer template](../../)
+[Back to kube-controller packer template](https://github.com/TheMattSchiller/kubernetes-packer-way/tree/master/kube-controller)
 
-[Back to Kubernetes the Packer Way Readme](../../../)
+[Back to Kubernetes the Packer Way Readme](https://github.com/TheMattSchiller/kubernetes-packer-way)

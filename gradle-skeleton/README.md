@@ -228,3 +228,7 @@ Done! Our directory structure should look as follows:
 
 ```
 We will use this skeleton for all gradle builds in this demo.
+
+[Example of usage](https://github.com/TheMattSchiller/kubernetes-packer-way/tree/master/kube-controller/deb/etcd)
+
+[Back to Kubernetes the Packer Way Readme](https://github.com/TheMattSchiller/kubernetes-packer-way)

@@ -1,7 +1,7 @@
 # Create an etcd package with Gradle
 Kubernetes uses etcd as a highly available key: value store. It stores the configuration of the Kubernetes cluster in etcd. It also stores the actual state of the system and the desired state of the system in etcd.
 
-This readme covers creation of an custom etcd package. Lets start by creating the folder structure for our package by copying our pre-created [gradle skeleton](../../../gradle_skeleton/README.md) into our etcd deb folder (this directory)
+This readme covers creation of an custom etcd package. Lets start by creating the folder structure for our package by copying our pre-created [gradle skeleton](https://github.com/TheMattSchiller/kubernetes-packer-way/tree/master/gradle_skeleton/README.md) into our etcd deb folder (this directory)
 
 Now we will add the paths for our static files needed for etcd:
 ```
@@ -9,7 +9,7 @@ mkdir -p debian/etc/etcd
 mkdir -p debian/etc/systemd/system
 mkdir -p usr/local/bin
 ```
-Now add the necessary certificates to the pki directory. See the [pki readme](../../../pki/)
+Now add the necessary certificates to the pki directory. See the [pki readme](https://github.com/TheMattSchiller/kubernetes-packer-way/tree/master/pki/)
 ```
 cp ../../../pki/ca.pem ../../../pki/kubernetes.pem ../../../pki/kubernetes-key.pem pki/
 ```
@@ -136,6 +136,6 @@ task buildDebianArtifact(type:Deb) {
   postInstallFile file('postinstall')
 }
 ```
-[Back to kube-controller packer template](../../)
+[Back to kube-controller packer template](https://github.com/TheMattSchiller/kubernetes-packer-way/tree/master/kube-controller)
 
-[Back to Kubernetes the Packer Way Readme](../../../)
+[Back to Kubernetes the Packer Way Readme](https://github.com/TheMattSchiller/kubernetes-packer-way)
