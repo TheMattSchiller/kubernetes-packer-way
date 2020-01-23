@@ -1,4 +1,4 @@
-# Create the kube-controller package with Gradle
+# Create a kube-controller package with Gradle
 The kube-controller package will configure an instance to run the following Kubernetes binaries at startup
 
 * [kube-apiserver](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/)
@@ -7,23 +7,14 @@ The kube-controller package will configure an instance to run the following Kube
 
 This will allow our kube-controller instaces to recieve api calls and to manage the state of our kubernetes cluster. These binaires are explained more in depth on the kubernetes documentation links provided above.
 
-# PKI
-First lets make add our required certifictates into the pki directory
+# Initial setup
+First we copy in our skeleton from the [gradle-skeleton](../../../gradle-skeleton/README.md) demo.
+
+We also need to have followed the [PKI](../../../pki/README.md) section of the demo so that we have the necessary certificates.
+
+We now need to create the directory structure to contain our static files
 ```
-cp ../../../pki/ca.pem \
-  ../../../pki/kubernetes.pem \
-  ../../../pki/kubernetes-key.pem \
-  ../../../pki/admin.pem \
-  ../../../pki/admin-key.pem \
-  ../../../pki/scheduler.pem \
-  ../../../pki/scheduler-key.pem \
-  ../../../pki/service-account.pem \
-  ../../../pki/service-account-key.pem \
-  pki/
-```
-We need to create the directory structure to contain our static files
-```
-mkdir -p debian/var/lib/kubernetes \
+$ mkdir -p debian/var/lib/kubernetes \
   debian/etc/kubernetes/config \
   debian/etc/nginx/sites-available \
   debian/etc/systemd/system
@@ -33,8 +24,10 @@ mkdir -p debian/var/lib/kubernetes \
 Now we will create the systemd service files.
 
 ## kube-apiserver.service
+`kube-apiserver` will handle all of our api requests and we need it to startup when the system starts
+
 Note that we want the kube-apiserver to start after the `etcd.service` as it is dependent on this service
-#### debian/etc/systemd/system/kube-apiserver.service
+#### `debian/etc/systemd/system/kube-apiserver.service`
 ```
 [Unit]
 Description=Kubernetes API Server
@@ -49,10 +42,11 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 ```
-kube-apiserver will use startup script to keep the service file cleaner and to make it easy to dynamically assign variables based on the indivdual instance running the service. This file needs to have the `--etcd-servers` and `--service-cluster-ip-range` parametes customized to the values of your cluster.
+
+`kube-apiserver` will use startup script to keep the service file cleaner and to make it easy to dynamically assign variables based on the indivdual instance running the service. This file needs to have the `--etcd-servers` and `--service-cluster-ip-range` parametes customized to the values of your cluster.
 * `--etcd-servers` needs to have the https address of each kube-controller in your cluster.
 * `--service-cluster-ip-range` needs to have the ip range which kubernetes will use to create [services](https://kubernetes.io/docs/concepts/services-networking/service/) on.
-
+#### `debian/etc/kubernetes/start-kube-apiserver.sh`
 ```
 #!/bin/bash
 
@@ -86,12 +80,16 @@ kube-apiserver will use startup script to keep the service file cleaner and to m
   --tls-private-key-file=/var/lib/kubernetes/kubernetes-key.pem \
   --v=2
   ```
+We need to change the mode of this file so that it can execute
+```
+chmod +x debian/etc/kubernetes/start-kube-apiserver.sh
+```
 
 ## kube-controller-manager.service
   Lets move on to the `kube-controller-manager` service. This one is pretty straight forward we just need to make sure that the following variables are set properly for our cluster:
   * `--cluster-cidr` needs to be set to the cidr of our cluster, this is the ip range where pods will be assigned (and each node will have a cidr for pods within this cluster cidr)
  * `--service-cluster-ip-range` needs to have the ip range which kubernetes will use to create [services](https://kubernetes.io/docs/concepts/services-networking/service/) on
-#### debian/etc/systemd/system/kube-controller-manager.service
+#### `debian/etc/systemd/system/kube-controller-manager.service`
 ```
 [Unit]
 Description=Kubernetes Controller Manager
@@ -150,7 +148,7 @@ leaderElection:
 
 ## kube-rbac.service
 Once our kube-controller is running we are going to need to read our role binding so that our nodes can register with the cluster. This is going to require making a few files containing the [ClusterRole and ClusterRoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/). Then we will create a script to run `kubectl` using the files, and finally call them after the `kube-apiserver` starts.
-#### debian/var/lib/kubernetes/kube-apiserver-to-kubelet-role
+#### `debian/var/lib/kubernetes/kube-apiserver-to-kubelet-role`
 ```
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
@@ -172,7 +170,7 @@ rules:
     verbs:
       - "*"
 ```
-#### debian/var/lib/kubernetes/kube-apiserver-to-kubelet-bind
+#### `debian/var/lib/kubernetes/kube-apiserver-to-kubelet-bind`
 ```
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
@@ -188,7 +186,7 @@ subjects:
     kind: User
     name: kubernetes
 ```
-#### debian/etc/kubernetes/kube-rbac.sh
+#### `debian/etc/kubernetes/kube-rbac.sh`
 This will be our service startup script and needs to have execute permission added
 ```
 #!/bin/bash
@@ -204,7 +202,7 @@ kubectl apply --kubeconfig ${KUBE_DIR}/admin.kubeconfig -f ${KUBE_DIR}/kube-apis
 ```
 $ chmod +x debian/etc/kubernetes/kube-rbac.sh
 ```
-#### debian/etc/systemd/system/kube-rbac.service
+#### `debian/etc/systemd/system/kube-rbac.service`
 ```
 [Unit]
 Description=Setup Role Binding
@@ -218,8 +216,9 @@ ExecStart=/bin/bash /etc/kubernetes/kube-rbac.sh
 [Install]
 WantedBy=multi-user.target
 ```
-#### postinstall
+## postinstall
 Now is a good time to create our `postinstall` script which will enable the services we just created after the package is installed
+#### `postinstall`
 ```
 #!/bin/bash
 
@@ -229,8 +228,9 @@ systemctl enable kube-apiserver kube-controller-manager kube-scheduler kube-conf
 
 # Generate kubecconfig scripts
 The following scripts we will create in order to generate our `.kubeconfig` files for each of the `kube-controller` components.
-#### create_admin_config.sh
+
 We need to add the `KUBERNETES_PUBLIC_ADDRESS` which matches the load balander ip for our cluster, and the admin cert/keys need to be in our `/var/lib/kubernetes` directory.
+#### `create_admin_config.sh`
 ```
 #!/bin/bash
 set -ex
@@ -259,8 +259,8 @@ kubectl config use-context default --kubeconfig=admin.kubeconfig
 
 mv admin.kubeconfig ${KUBE_DIR}/
 ```
-#### create_kube_controller_manager_config.sh
 We need to add the `KUBERNETES_PUBLIC_ADDRESS` which matches the load balander ip for our cluster, and the admin cert/keys need to be in our `/var/lib/kubernetes` directory.
+#### `create_kube_controller_manager_config.sh`
 ```
 #!/bin/bash
 set -ex
@@ -289,8 +289,8 @@ kubectl config use-context default --kubeconfig=kube-controller-manager.kubeconf
 
 mv kube-controller-manager.kubeconfig ${KUBE_DIR}/
 ```
-#### create_kube_scheduler_config.sh
 We need to add the `KUBERNETES_PUBLIC_ADDRESS` which matches the load balander ip for our cluster, and the admin cert/keys need to be in our `/var/lib/kubernetes` directory.
+#### `create_kube_scheduler_config.sh`
 ```
 #!/bin/bash
 set -ex
@@ -319,8 +319,8 @@ kubectl config use-context default --kubeconfig=kube-scheduler.kubeconfig
 
 mv kube-scheduler.kubeconfig ${KUBE_DIR}/
 ```
-#### create_encryption_config.sh
 This script will create our enryption config by generating a random base64 string, adding it into an [EncryptionConfig](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/) file which will be used to encrypt data at rest in our cluster. This file is used by the `kube-apiserver` and is passed into its startup with the`--encryption-provider-config`
+#### `create_encryption_config.sh`
 ```
 #!/bin/bash
 set -ex
@@ -349,6 +349,7 @@ mv encryption-config.yaml debian/var/lib/kubernetes/
 
 # Add kubernetes binaries script
 This script will download the kubernetes binaries for `$KUBE_RELEASE` version, change thier permissions, and add them to the `/usr/local/bin` folder
+#### `add_kube_binaries.sh`
 ```
 #!/bin/bash
 set -ex
@@ -373,7 +374,7 @@ mv kube-apiserver kube-controller-manager kube-scheduler kubectl debian/usr/loca
 
 # Healthz healthcheck nginx config file
 Packer is going to install nginx and this is a fine of place as any to put our nginx config file which we will link after installing nginx. We cannot call `apt` to install during a `dpkg` install so we will do that with a step in packer. If we were using a apt repository we would be able to have dependencies but since we are doing a standalone package install we are just going to install dependencies with packer.
-#### debian/etc/nginx/sites-available/kubernetes.default.svc.cluster.local
+#### `debian/etc/nginx/sites-available/kubernetes.default.svc.cluster.local`
 ```
 server {
   listen      80;
@@ -387,12 +388,13 @@ server {
 ```
 
 # Gradle build
-#### build.gradle
+
 Finally we just need to create our `build.gradle` file which will run all of our build scripts and package our `debian/` directory into a `kube-controller.deb` with our postinstall script.
 
 Notice that each of our build scripts are referenced as an exec task, these create all of our configs and download all of the binaries adding them to the correct directories in `debian/` directory.
 
 Our `buildDebianArtifact` task has a `dependsOn` directive for each of the exec tasks. Then several 'from' statements to add our folders in `/debian` to the required paths on the system installing the package. Finally the `postinstall` script is added into a `postInstallFile` method which will run on the system after all of the files from the package are in place.
+#### `build.gradle`
 ```
 
 buildscript {
@@ -459,3 +461,4 @@ task buildDebianArtifact(type:Deb) {
   postInstallFile file('postinstall')
 }
 ```
+[back to kube-controller packer readme](../README.md)

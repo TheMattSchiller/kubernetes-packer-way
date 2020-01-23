@@ -9,12 +9,11 @@ mkdir -p debian/etc/etcd
 mkdir -p debian/etc/systemd/system
 mkdir -p usr/local/bin
 ```
-Now add the necessary certificates to the pki directory. See the [pki readme](../../../pki/README.md)
-```
-cp ../../../pki/ca.pem ../../../pki/kubernetes.pem ../../../pki/kubernetes-key.pem pki/
-```
+We need to have followed [pki readme](../../../pki/README.md) before working on this part of the demo.
+
+# Systemd service files
 Create the systemd service file
-#### debian/etc/systemd/system/etcd.service
+#### `debian/etc/systemd/system/etcd.service`
 ```
 [Unit]
 Description=etcd
@@ -30,7 +29,7 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 Create the systemd service script. This script is used to dynamically start the systemd service using the gcp metatdata for the instance ip as well as its hostname.
-#### debian/etc/etcd/start-etcd.sh
+#### `debian/etc/etcd/start-etcd.sh`
 ```
 #!/bin/bash
 
@@ -60,8 +59,9 @@ Add execute permission to the `start-etcd.sh` script
 ```
 chmod +x debian/etc/etcd/start-etcd.sh
 ```
+# Gradle build scripts
 Now we will create a script which will run on the host building the package which will download and install the etcd binaries
-#### add_etcd_binary.sh
+#### `add_etcd_binary.sh`
 ```
 #!/bin/bash
 set -ex
@@ -85,14 +85,14 @@ chmod +x debian/usr/local/bin/*
 rm -rf ${ETCD}.tar.gz ${ETCD}
 ```
 We need a postinstall script to enable the etcd service
-#### postinstall
+#### `postinstall`
 ```
 #!/bin/bash
 
 systemctl enable etcd
 ```
 Finally we need to make a build.gradle file which will run our `add_etcd_binary.sh` script and add the contents of our package. This file runs our host script and then directs all of our static files and folders into the proper locations, then adds the postinstall script.
-#### build.gradle
+#### `build.gradle`
 ```
 buildscript {
   repositories {
