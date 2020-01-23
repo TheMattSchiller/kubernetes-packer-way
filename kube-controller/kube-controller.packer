@@ -1,0 +1,32 @@
+{
+  "builders": [
+    {
+      "type": "googlecompute",
+      "image_name": "kube-controller",
+      "project_id": "",
+      "source_image": "ubuntu-1804-bionic-v20200108",
+      "ssh_username": "packer",
+      "zone": "us-west1-a"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "build/etcd*.deb",
+      "destination": "/tmp/"
+    },
+    {
+      "type": "file",
+      "source": "build/kube-controller*.deb",
+      "destination": "/tmp/"
+    },
+    {
+      "type": "shell",
+      "script": "configure_nginx.sh"
+    },
+    {
+      "type": "shell",
+      "script": "install_deb_pkgs.sh"
+    }
+  ]
+}
