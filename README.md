@@ -4,7 +4,7 @@ This repo contains the source code and instructions for creating packer images c
 Read about the various topics and see a tutorial of the code here:
 
 * [cloudbuild setup](cloudbuild.md)
-* [gradle skeleton](gradle-skeleton/README.md)
+* [gradle skeleton](gradle-skeleton/)
 * [kube-controller gcp image made using packer](kube-controller/)
 * [kube-node gcp image made using packer](kube-node/) (tutorial development in-progress)
 

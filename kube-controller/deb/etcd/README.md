@@ -136,4 +136,6 @@ task buildDebianArtifact(type:Deb) {
   postInstallFile file('postinstall')
 }
 ```
-[Back to kube-controller packer template](../../README.md)
+[Back to kube-controller packer template](../../)
+
+[Back to Kubernetes the Packer Way Readme](../../../)
